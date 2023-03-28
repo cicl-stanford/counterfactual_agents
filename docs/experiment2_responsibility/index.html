@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Psychology Experiment </title>
+        
+        <link rel="stylesheet" href='css/jspsych.css' />
+        <link rel="stylesheet" href='css/jquery-ui-edit.css' />
+        <link rel="stylesheet" href='css/jquery-ui-slider-pips-edit.css' />
+       
+        <script src='js/jquery.min.js'></script>
+        <script src='js/jquery-ui.min.js'></script>
+        <script src='js/jquery-ui-slider-pips.js'></script>
+        <script src='https://proliferate.alps.science/static/js/proliferate.js'></script>
+
+        <script src='js/jspsych.js'></script>
+        <script src='js/jspsych-instructions.js'></script>
+        <script src='js/jspsych-button.js'></script>
+        <script src='js/jspsych-multi-choice.js'></script>
+        <script src='js/jspsych-form.js'></script>
+
+        <script src="js/judge-resp.js"></script>
+        <script src='js/consent.js'></script>
+        <script src='js/feedback-demographics.js'></script>
+        <script src='js/trial_info.js'></script>
+        <script src='js/utils.js'></script>
+        <script src='instructions/text.js'></script>
+    </head>
+
+    </body></body>
+
+    <script>
+        // -----------------------------------------------------
+        // consent, instructions, and comprehension check
+        // -----------------------------------------------------
+        // consent form is located in js/consent.js
+        // set up such that if comprehension questions are answered incorrectly,
+        // participant is redirected back to beginning of instructions
+
+        var instructions = {
+            type: 'instructions',
+            pages: instruction_pages,
+            show_clickable_nav: true,
+            on_start: function() { jsPsych.setProgressBar(0.02); },
+            on_finish: function() { jsPsych.setProgressBar(0.10); }
+        };
+
+        var instructions_trial = {
+            type: 'judge-resp',
+            trial: 0,
+            title: 'Example',
+            red_name: ex_red_name,
+            blue_name: ex_blue_name,
+            outcome: ex_outcome,
+            on_finish: function() { jsPsych.setProgressBar(0.12); }
+        }
+
+        var instructions_last = {
+            type: 'html-button-response',
+            stimulus: instructions_last,
+            choices: ['Continue'],
+            is_narrow: true,
+            on_finish: function() { jsPsych.setProgressBar(0.14); }
+        }
+ 
+        var comprehension_qs = {
+            type: 'survey-multi-choice',
+            questions: [
+                {
+                    stimulus: comprehension1,
+                    options: options1,
+                    horizontal: true
+                },
+                {
+                    stimulus: comprehension2,
+                    options: options2,
+                    horizontal: true
+                },
+                {
+                    stimulus: comprehension3,
+                    options: options3,
+                    horizontal: true
+                },
+            ],
+            preamble: 'Please answer a few comprehension questions so we know' +
+                ' that you understand the setup.',
+            on_finish: function(data){
+                // jspsych records responses as json strings
+                data.correct = (data.responses == '{"Q0":"False","Q1":"3 only","Q2":"True"}');
+            }
+        }
+        
+        var fail_comprehension = {
+            timeline: [{
+                type: 'html-button-response',
+                stimulus: 'Unfortunately, you missed some of the comprehension ' +
+                    'questions.</p> <p> Please review the instructions again.',
+                choices: ['Review'],
+            }],
+            conditional_function: function(){
+                var data = jsPsych.data.get().last(1).values()[0];
+                return !(data.correct);
+            }
+        }
+
+        var loop_node = {
+            timeline: [
+                instructions,
+                instructions_trial,
+                instructions_last,
+                comprehension_qs,
+                fail_comprehension
+            ],
+            loop_function: function(data){
+                var data = jsPsych.data.get().last(1).values()[0];
+                return !(data.correct);
+            }
+        }
+        
+
+        // -----------------------------------------------------
+        // experiment trials
+        // -----------------------------------------------------
+
+        // add transition to start
+        var trials_start1 = {
+            type: 'html-button-response',
+            stimulus: start_prompt1,
+            choices: ['Continue'],
+            is_narrow: true,
+            on_finish: function() { jsPsych.setProgressBar(0.16); },
+        };
+        
+        var trials_start2 = {
+            type: 'html-button-response',
+            stimulus: start_prompt2,
+            choices: ['Start'],
+            is_narrow: true,
+            on_finish: function() { jsPsych.setProgressBar(0.18); },
+        };
+
+        var num_trials = trial_info.length;
+        // this function just randomizes trial order, but I precompute/record it
+        // instead of calling through jsPsych in order to display it for each trial
+        var trial_order = generate_trial_order(num_trials);
+        // console.log(trial_order);
+        
+        var trials = {
+            timeline_variables: trial_info,
+            timeline: [
+                {
+                    type: 'instructions',
+                    pages: jsPsych.timelineVariable('pages'),
+                    header: function() {
+                        var html = '<h2> Scenario ' + (trial_order.indexOf(jsPsych
+                            .timelineVariable('trial', true) - 1) + 1) + '</h2>';
+                        return html;
+                    },
+                    footer: function() {
+                        var html = '<p> Players: ' +
+                            red(jsPsych.timelineVariable('red_name', true)) + ', ' +
+                            blue(jsPsych.timelineVariable('blue_name', true)) + '</p>';
+                        return html;
+                    },
+                    show_clickable_nav: true,
+                    button_label_previous: '',
+                    button_label_next: ''
+                },
+                {
+                    type: 'judge-resp',
+                    trial: jsPsych.timelineVariable('trial'),
+                    title: function() {
+                        var html = '<h2> Scenario ' + (trial_order.indexOf(jsPsych
+                            .timelineVariable('trial', true) - 1) + 1) + '</h2>';
+                        return html;
+                    },
+                    red_name: jsPsych.timelineVariable('red_name'),
+                    blue_name: jsPsych.timelineVariable('blue_name'),
+                    outcome: jsPsych.timelineVariable('outcome')
+                },
+            ],
+            choices: ['Continue'],
+            sample: {
+                type: 'custom',
+                fn: function(t) {
+                    return trial_order;
+                },
+            },
+            on_finish: function() {
+                var prog = jsPsych.getProgressBarCompleted();
+                jsPsych.setProgressBar(prog + 0.015);
+            }
+        };
+
+
+        // -----------------------------------------------------
+        // feedback and demographic info
+        // -----------------------------------------------------
+        // note: Prolific collects: country of birth, current country of
+        //       residence, employment status, first language, nationality,
+        //       sex, and student status
+        // form in js/feedback-demographics.js
+
+        
+        // -----------------------------------------------------
+        // compile everything
+        // -----------------------------------------------------
+
+        timeline = [];
+        timeline.push(consent);
+        timeline.push(loop_node);
+        timeline.push(trials_start1);
+        timeline.push(trials_start2);
+        timeline.push(trials);
+        timeline.push(feedback_demographics);
+
+        jsPsych.init({
+            timeline: timeline,
+            preload_images: instruction_images.concat(trial_images),
+            show_progress_bar: true,
+            auto_update_progress_bar: false,
+            on_finish: function() {
+                var data = jsPsych.data.get();
+                var values_resp = data.filter({trial_type: 'judge-resp'}).values();
+                var values_feedback = data.filter({trial_type: 'survey-html-form'}).values();
+                // console.log(free_responses)
+                
+                // trials data
+                var trials = [];
+                for (var i = 0; i < num_trials + 1; i++) {
+                    trials.push({
+                        "trial": parseInt(values_resp[i]['trial']),
+                        "resp_red": parseInt(values_resp[i]['resp_red']),
+                        "resp_blue": parseInt(values_resp[i]['resp_blue']),
+                    });
+                }
+                
+                // participant data
+                var participant = JSON.parse(values_feedback[0]['responses']);
+                // override if selected "other" or none
+                if (participant.gender == "other_gender" || typeof participant.gender == "undefined") {
+                    participant.gender = participant.other_gender;
+                }
+                delete participant.other_gender;
+                if (participant.race == "other_race" || typeof participant.race == "undefined") {
+                    participant.race = participant.other_race;
+                }
+                delete participant.other_race;
+                if (typeof participant.ethnicity == "undefined") {
+                    participant.ethnicity = "";
+                }
+                participant.age = parseInt(participant.age);
+                participant.time = parseInt(values_feedback[0]['time_elapsed']);
+
+                // submit
+                proliferate.submit({
+                    "trials": trials,
+                    "participants": [participant],
+                });
+
+                $('#jspsych-content').css('margin-top', 'auto');
+                $('#jspsych-content').html('<div style="margin: auto;"> <p>' +
+                    ' Thank you for participating in this experiment! </p>' +
+                    '<p> Redirecting you back to Prolific... </p>');
+                setTimeout(function(){}, 200);
+            }
+        });
+    </script>
+
+</html>
