@@ -93,3 +93,15 @@ Preregistrations for all experiments are available on the Open Science Framework
 
 ## Model usage
 
+Make sure you're in the ``model/`` directory and can see ``main.py``. This is the primary file for generating trials and running the simulation models. The basic command structure for running the models on a specific trial is:
+```
+python main.py --experiment <exp> --trial <trial> --cf --intention --effort
+```
+where ``<exp>`` specifies either experiment `1` or `2`, and ``<trial>`` is the trial number within that experiment, from `1` to `24`. This flag can be left off to run all 24 trials of the specified experiment. The ``--cf``, ``--intention``, and ``--effort`` flags indicate running the counterfactual simulation, intention inference, and effort models, respectively. Any combination of these three flags can be included. For example, the command to run only the counterfactual model on all 24 trials of experiment 1 is:
+```
+python main.py --experiment 1 --cf
+```
+Other flags that can be added:
+*   ``--visualize`` will generate step-by-step images and a gif of the specified trial (or all trials), which will be saved in ``model/trials/`` within the corresponding experiment subfolder, under the corresponding trial number.
+*  ``--verbose`` will print out step-by-step information about each agent's plan as the trial is being generated.
+*  ``--n-simulations <n>`` specifies the number of counterfactual simulations to run, default 500.
