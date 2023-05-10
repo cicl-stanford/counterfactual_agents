@@ -95,7 +95,7 @@ Preregistrations for all experiments are available on the Open Science Framework
 
 ### Running models
 
-Make sure you're in the ``model/`` directory and can see ``main.py``. This is the primary file for generating trials and running the simulation models. The basic command structure for running the models on a specific trial is:
+Make sure you're in the ``model`` directory and can see ``main.py``. This is the primary file for generating trials and running the simulation models. The basic command structure for running the models on a specific trial is:
 ```
 python main.py --experiment <exp> --trial <trial> --cf --intention --effort
 ```
@@ -104,7 +104,7 @@ where ``<exp>`` specifies either experiment `1` or `2`, and ``<trial>`` is the t
 python main.py --experiment 1 --cf
 ```
 Other flags that can be added:
-*   ``--visualize`` will generate step-by-step images and a gif of the specified trial (or all trials), which will be saved in ``trials/`` within the corresponding experiment subfolder, named by trial number.
+*   ``--visualize`` will generate step-by-step images and a gif of the specified trial (or all trials), which will be saved in ``trials`` within the corresponding experiment subfolder, named by trial number.
 *  ``--verbose`` will print out step-by-step information about each agent's plan as the trial is being generated.
 *  ``--n-simulations <n>`` specifies the number of counterfactual simulations to run, default 500.
 
@@ -115,7 +115,7 @@ The command `--make-images` can be used to generate an image of the gridworld fo
 python main.py --experiment <exp> --make-images --trial <trial>
 ```
 
-The image will be saved in the `grid_images/` directory within the corresponding experiment subfolder, named by trial number. Generating these images can be helpful if you want to modify any of the current grids or create a new one and see what it looks like. All the gridworlds are located in `grids/` as text files. Each file defines the grid configuration using symbols that get parsed into gridworld objects:
+The image will be saved in the `model/grid_images` directory within the corresponding experiment subfolder, named by trial number. Generating these images can be helpful if you want to modify any of the current grids or create a new one and see what it looks like. All the gridworlds are located in `model/grids` as text files. Each file defines the grid configuration using symbols that get parsed into gridworld objects:
 
 *   <code>&nbsp;</code> --> floor square
 *   `g` --> goal square
@@ -164,7 +164,7 @@ In addition, we define special action tuples for the blue agent to hold or relea
 -  `[0, 2]` and `[0, 3]` --> hold and release box below
 -  `[0, -2]` and `[0, -3]` --> hold and release box above
 
-For each experiment, the trials are defined in `trials/experimentX/experimentX.json` where X is the experiment number.
+For each experiment, the trials are defined in `experiments/experimentX/experimentX.json` where X is the experiment number.
 
 Each JSON string contains:
 - `"num"`: the trial number (`1` to `24`)
