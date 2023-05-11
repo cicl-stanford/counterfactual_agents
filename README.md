@@ -1,8 +1,8 @@
 # A computational model of responsibility judgments from counterfactual simulations and intention inferences
 
 This repository contains the models, experiments, data, analyses, and figures
-for the paper "A computational model of responsibility judgments from
-counterfactual simulations and intention inferences"
+for the paper "[A computational model of responsibility judgments from
+counterfactual simulations and intention inferences](https://psyarxiv.com/uwdbr)"
 by Sarah A. Wu, Shruti Sridhar, and Tobias Gerstenberg.
 
 Presented at the 45th Annual Conference of the Cognitive Science Society
