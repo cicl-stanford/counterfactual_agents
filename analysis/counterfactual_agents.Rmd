@@ -246,7 +246,7 @@ info.exp1 = read_csv(paste0(info_dir, 'models.csv'),
   mutate(outcome = factor(outcome, levels = c('success', 'fail')),
          trial_label = c(1, NA, NA, NA, NA, NA, NA, NA,
                          2, NA, NA, NA, NA, 3, NA, 4,
-                         5, NA, NA, NA, 6, NA, 7, 8)
+                         5, NA, NA, NA, 6, NA, 7, 8),
          ) %>%
   left_join(read_csv(paste0(info_dir, 'heuristics.csv'),
                      show_col_types = F),
@@ -415,7 +415,10 @@ data.exp1.means = info.exp1 %>%
   left_join(data.exp1.effort %>%
               group_by(trial) %>%
               summarise(effort = mean(effort)),
-            by = 'trial')
+            by = 'trial') %>%
+  mutate(effort_model = effort_model * max(effort) / max(effort_model))
+
+info.exp1$effort_model = data.exp1.means$effort_model
 
 data.exp1.modeling = data.exp1.resp %>%
   left_join(data.exp1.means,
@@ -436,6 +439,14 @@ fit.exp1.cf = brm(
 
 fit.exp1.int = brm(
   formula = resp ~ 1 + int_recode + (1 | id),
+  data = data.exp1.modeling,
+  iter = 2000,
+  seed = 1,
+  file = "cache/fit.exp1.int"
+)
+
+fit.exp1.effort = brm(
+  formula = resp ~ 1 + effort + (1 | id),
   data = data.exp1.modeling,
   iter = 2000,
   seed = 1,
@@ -709,9 +720,7 @@ plot.exp1.effort_model = scatterplot(
     left_join(info.exp1 %>%
                 select(trial, effort_model_mean = effort_model),
               by = 'trial') %>%
-    # normalize scales
-    mutate(effort_model_mean = effort_model_mean * max(effort_mean) / max(effort_model_mean),
-           effort_model_low = effort_model_mean,
+    mutate(effort_model_low = effort_model_mean,
            effort_model_high = effort_model_mean),
   'effort_model', '<span style="color:aquamarine3">effort model</span>',
   'effort', '<span style="color:aquamarine3">effort judgment</span>'
