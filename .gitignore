@@ -2,9 +2,9 @@
 .Rhistory
 .Rapp.history
 .Rproj.user/
-.RData
-.Ruserdata
-.Renviron
+*.RData
+*.Ruserdata
+*.Renviron
 /*.Rcheck/
 
 # Miscellaneous

@@ -1223,13 +1223,11 @@ data.exp2.all = data.exp2.resp %>%
   rbind(data.exp2.int %>%
          select(plot_id, trial, judgment = int) %>%
          mutate(condition = 'int')) %>%
-  mutate(condition = factor(condition,
-                            levels = conditions)) %>%
+  mutate(condition = factor(condition, levels = conditions)) %>%
   left_join(info.exp2 %>% select(trial, trial_label),
             by = 'trial') %>%
   filter(trial %in% trials.exp2) %>%
-  mutate(trial = as.integer(factor(trial,
-                                   levels = trials.exp2)))
+  mutate(trial = as.integer(factor(trial, levels = trials.exp2)))
 
 data.exp2.models = info.exp2 %>%
   select(trial, cf_model, int_model) %>%
@@ -1247,22 +1245,20 @@ data.exp2.models = info.exp2 %>%
             by = 'trial') %>%
   rename_with(~ sub('_model', '', .x)) %>% 
   filter(trial %in% trials.exp2) %>%
-  mutate(trial = as.integer(factor(trial,
-                                   levels = trials.exp2))) %>%
   pivot_longer(cols = -trial,
                names_to = 'condition',
                values_to = 'prediction') %>%
-  mutate(condition = factor(condition,
-                            levels = conditions))
+  mutate(condition = factor(condition, levels = conditions),
+         trial = as.integer(factor(trial, levels = trials.exp2)))
 ```
 
 ```{r}
 labels.exp2 = data.frame(trial = trials.exp2) %>%
-  mutate(trial = as.integer(factor(trial,
-                                   levels = trials.exp2)),
-         grob = map(.x = trial,
+  mutate(grob = map(.x = trial,
                     .f = ~ readPNG(paste0(figures_dir, 'trial_stills/',
-                                          .x, '.png'))))
+                                          .x, '.png'))),
+         trial = as.integer(factor(trial,
+                                   levels = trials.exp2)))
 ```
 
 ### Barplot
